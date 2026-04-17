@@ -1,0 +1,25 @@
+{
+  "id": 967915,
+  "text": "Hey, are you there?",
+  "sent_at": "2026-04-15T21:52:47Z",
+  "read": true,
+  "sender": {
+    "id": 4621,
+    "name": "Carlos Lee",
+    "avatar_url": "https://i.pravatar.cc/150?u=267"
+  },
+  "reactions": [
+    {
+      "emoji": "🔥",
+      "count": 11
+    },
+    {
+      "emoji": "😂",
+      "count": 4
+    },
+    {
+      "emoji": "❤️",
+      "count": 8
+    }
+  ]
+}

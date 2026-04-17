@@ -7,12 +7,13 @@ import java.io.FileReader;
 import java.io.IOException;
 
 import com.google.gson.Gson;
+import com.voronina.course.lastmessageapi.LastMessage;
 import com.voronina.course.randomuserapi.RandomUser;
 
 public class Main {
     public static void main(String[] args) throws FileNotFoundException, IOException {
         System.out.println("Hello world!");
-        BufferedReader br = new BufferedReader(new FileReader("input.json"));
+        BufferedReader br = new BufferedReader(new FileReader("input2.json"));
         String everything;
         try {
             StringBuilder sb = new StringBuilder();
@@ -29,6 +30,7 @@ public class Main {
         }
         System.out.println(everything);
         Gson gson = new Gson();
-        RandomUser user = gson.fromJson(everything, RandomUser.class);
+        LastMessage user = gson.fromJson(everything, LastMessage.class);
+        System.out.println(user.getReactions());
     }
 }

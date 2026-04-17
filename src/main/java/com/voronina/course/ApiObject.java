@@ -6,5 +6,6 @@ import com.google.gson.Gson;
 
 public interface ApiObject {
   Gson toGson();
-  CSVRecord toCSVRecord();
+  String[] toCsvFields();
+  String[] csvHeaders();
 }

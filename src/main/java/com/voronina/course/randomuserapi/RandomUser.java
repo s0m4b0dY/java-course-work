@@ -1,16 +1,30 @@
 package com.voronina.course.randomuserapi;
 
-import java.io.IOException;
-
-import org.apache.commons.csv.CSVFormat;
-import org.apache.commons.csv.CSVParser;
-import org.apache.commons.csv.CSVRecord;
-
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.voronina.course.ApiObject;
 
 public class RandomUser implements ApiObject {
+  static final String[] CSV_HEADERS = {
+      "gender",
+      "title",
+      "first",
+      "last",
+      "city",
+      "streetName",
+      "streetNumber",
+      "email",
+      "uuid",
+      "username",
+      "password",
+      "registeredDate",
+      "registeredAge",
+      "phone",
+      "cell",
+      "idName",
+      "idValue"
+  };
+
   private String gender;
   private Name name;
   private Location location;
@@ -27,18 +41,16 @@ public class RandomUser implements ApiObject {
   }
 
   @Override
-  public CSVRecord toCSVRecord() {
+  public String[] toCsvFields() {
     String title = name != null ? safe(name.getTitle()) : "";
     String first = name != null ? safe(name.getFirst()) : "";
     String last = name != null ? safe(name.getLast()) : "";
 
     String city = location != null ? safe(location.getCity()) : "";
-    String streetName =
-        location != null && location.getStreet() != null ? safe(location.getStreet().getName()) : "";
-    String streetNumber =
-        location != null && location.getStreet() != null
-            ? String.valueOf(location.getStreet().getNumber())
-            : "";
+    String streetName = location != null && location.getStreet() != null ? safe(location.getStreet().getName()) : "";
+    String streetNumber = location != null && location.getStreet() != null
+        ? String.valueOf(location.getStreet().getNumber())
+        : "";
 
     String uuid = login != null ? safe(login.getUuid()) : "";
     String username = login != null ? safe(login.getUsername()) : "";
@@ -50,31 +62,30 @@ public class RandomUser implements ApiObject {
     String idName = id != null ? safe(id.getName()) : "";
     String idValue = id != null ? safe(id.getValue()) : "";
 
-    String csvLine =
-        CSVFormat.DEFAULT.format(
-            safe(gender),
-            title,
-            first,
-            last,
-            city,
-            streetName,
-            streetNumber,
-            safe(email),
-            uuid,
-            username,
-            password,
-            registeredDate,
-            registeredAge,
-            safe(phone),
-            safe(cell),
-            idName,
-            idValue);
+    return new String[] {
+        safe(gender),
+        title,
+        first,
+        last,
+        city,
+        streetName,
+        streetNumber,
+        safe(email),
+        uuid,
+        username,
+        password,
+        registeredDate,
+        registeredAge,
+        safe(phone),
+        safe(cell),
+        idName,
+        idValue
+    };
+  }
 
-    try (CSVParser parser = CSVParser.parse(csvLine, CSVFormat.DEFAULT)) {
-      return parser.iterator().next();
-    } catch (IOException e) {
-      throw new IllegalStateException("Failed to convert RandomUser to CSVRecord", e);
-    }
+  @Override
+  public String[] csvHeaders() {
+    return CSV_HEADERS;
   }
 
   private static String safe(String value) {
