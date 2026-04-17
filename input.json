@@ -1,0 +1,31 @@
+{
+  "gender": "female",
+  "name": {
+    "title": "Miss",
+    "first": "Angela",
+    "last": "Crespo"
+  },
+  "location": {
+    "street": {
+      "number": 9319,
+      "name": "Calle de Toledo"
+    },
+    "city": "Cartagena"
+  },
+  "email": "angela.crespo@example.com",
+  "login": {
+    "uuid": "1215ea2f-5bf0-46e6-8b8f-b391820fe9ea",
+    "username": "yellowpanda303",
+    "password": "lakota"
+  },
+  "registered": {
+    "date": "2003-12-11T11:43:30.678Z",
+    "age": 22
+  },
+  "phone": "910-986-866",
+  "cell": "640-871-757",
+  "id": {
+    "name": "DNI",
+    "value": "59296028-J"
+  }
+}
