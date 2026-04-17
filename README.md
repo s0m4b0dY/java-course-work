@@ -1,4 +1,6 @@
 ```sh
+fastapi dev
+
 mvn exec:java -Dexec.mainClass="com.voronina.course.Main" -Dexec.args="--auto --format=json --output=data --count=100 --interval=500"
 
 mvn exec:java -Dexec.mainClass="com.voronina.course.Main" -Dexec.args="--auto --format=json --output=data --count=100 --interval=50"
