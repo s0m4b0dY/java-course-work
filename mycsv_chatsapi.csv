@@ -1,0 +1,21 @@
+chat_id,name,unread_count,is_muted,last_activity_text,last_activity_sent_at,last_activity_author
+8376,Book Club,1,false,"Hey, are you there?",2026-04-15T09:45:05Z,Eve
+5071,Book Club,8,true,Thanks for yesterday!,2026-04-13T22:54:05Z,Hank
+2958,Work Crew,1,true,Just sent you the file.,2026-04-10T20:05:05Z,Eve
+2778,Work Crew,12,true,Call me when you're free.,2026-04-17T11:32:05Z,Grace
+8790,Team Alpha,10,true,Just sent you the file.,2026-04-11T21:45:05Z,Diana
+3785,Game Night,13,false,I'll be a bit late.,2026-04-15T09:55:05Z,Alice
+7784,Book Club,9,true,Did you see the news?,2026-04-12T07:57:05Z,Eve
+9024,Game Night,6,false,Can we reschedule?,2026-04-10T00:42:05Z,Carlos
+3040,Work Crew,15,false,Thanks for yesterday!,2026-04-12T11:28:05Z,Carlos
+6810,Work Crew,6,true,"Hey, are you there?",2026-04-16T13:53:05Z,Eve
+575,Old Friends,9,true,Don't forget about tonight!,2026-04-11T08:45:05Z,Eve
+5678,Work Crew,7,false,Just sent you the file.,2026-04-17T01:42:05Z,Diana
+5877,Family,5,true,Can we reschedule?,2026-04-12T13:48:05Z,Frank
+1728,Work Crew,1,true,Just sent you the file.,2026-04-16T05:05:05Z,Hank
+750,Game Night,5,false,Call me when you're free.,2026-04-15T23:03:05Z,Frank
+9623,Book Club,4,true,I'll be a bit late.,2026-04-17T12:49:05Z,Frank
+4522,Family,0,false,Thanks for yesterday!,2026-04-10T08:44:05Z,Bob
+1442,Old Friends,2,true,"Hey, are you there?",2026-04-11T20:21:05Z,Frank
+5918,Game Night,15,true,Thanks for yesterday!,2026-04-14T21:28:05Z,Carlos
+4984,Game Night,14,true,Thanks for yesterday!,2026-04-16T10:15:05Z,Alice

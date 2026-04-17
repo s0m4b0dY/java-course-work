@@ -1,15 +1,15 @@
-package com.voronina.course.randomuserapi;
+package com.voronina.course.chatsapi;
 
 import java.io.IOException;
 
 import com.voronina.course.Api;
 import com.voronina.course.ApiObject;
 
-public class RandomUserApi implements Api {
-  private static final String API_URL = "https://randomuser.me/api/";
+public class ChatsApi implements Api {
+  private static final String API_URL = "http://localhost:8000/chats";
 
   public String name() {
-    return "RandomUserApi";
+    return "ChatsApi";
   }
 
   @Override
@@ -21,13 +21,18 @@ public class RandomUserApi implements Api {
 
     java.net.http.HttpResponse<String> response = client.send(request,
         java.net.http.HttpResponse.BodyHandlers.ofString());
+
     com.google.gson.Gson gson = new com.google.gson.GsonBuilder().serializeNulls().create();
     ResponseWrapper wrapper = gson.fromJson(response.body(), ResponseWrapper.class);
-    return wrapper.results;
+    if (wrapper == null || wrapper.chats == null || wrapper.chats.length == 0) {
+      throw new IllegalStateException("No chats returned from API");
+    }
+    return wrapper.chats;
   }
 
-  // Minimal wrapper matching randomuser.me response
+  // Minimal wrapper matching the chats API response
   private static class ResponseWrapper {
-    RandomUser[] results;
+    int total;
+    Chat[] chats;
   }
 }
