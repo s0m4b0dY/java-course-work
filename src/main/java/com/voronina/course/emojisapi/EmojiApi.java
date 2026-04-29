@@ -20,7 +20,6 @@ public class EmojiApi implements Api {
 
   @Override
   public ApiObject[] fetchData() throws IOException, InterruptedException {
-    System.out.println("Fetching data from EmojiApi...");
     HttpClient client = HttpClient.newHttpClient();
     HttpRequest request = HttpRequest.newBuilder(URI.create(API_URL))
         .GET()
