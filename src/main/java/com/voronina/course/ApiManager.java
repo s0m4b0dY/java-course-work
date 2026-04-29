@@ -57,47 +57,52 @@ public class ApiManager {
       List<ApiObject> list = new ArrayList<>(perApiTarget);
       int consecutiveFailures = 0;
 
+      System.out.println("Starting fetch from API: " + api.name() + " (target: " + perApiTarget + " objects)");
+
       while (list.size() < perApiTarget) {
+      try {
+        System.out.println("Fetching from '" + api.name() + "' (current: " + list.size() + "/" + perApiTarget + ")");
+        ApiObject[] objs = api.fetchData();
+        if (objs == null || objs.length == 0) {
+        consecutiveFailures++;
+        System.out.println("Warning: api '" + api.name() + "' returned no objects (failure #" + consecutiveFailures + ").");
+        } else {
+        // reset failure streak on success
+        consecutiveFailures = 0;
+        System.out.println("Successfully fetched " + objs.length + " objects from '" + api.name() + "'");
+        for (ApiObject o : objs) {
+          if (o == null) continue;
+          list.add(o);
+          if (list.size() >= perApiTarget) break;
+        }
+        }
+      } catch (IOException e) {
+        consecutiveFailures++;
+        System.out.println("Warning: IOException while fetching from '" + api.name() + "': " + e.getMessage());
+      } catch (InterruptedException e) {
+        Thread.currentThread().interrupt();
+        System.out.println("Fatal: interrupted while fetching from '" + api.name() + "'. Aborting.");
+        return;
+      } catch (RuntimeException e) {
+        consecutiveFailures++;
+        System.out.println("Warning: unexpected error while fetching from '" + api.name() + "': " + e.getMessage());
+      }
+
+      if (consecutiveFailures >= maxConsecutiveFailures) {
+        System.out.println("Fatal: too many consecutive failures for '" + api.name() + "' (>= " + maxConsecutiveFailures + "). Aborting run.");
+        return;
+      }
+
+      if (intervalMillis > 0 && list.size() < perApiTarget) {
         try {
-          ApiObject[] objs = api.fetchData();
-          if (objs == null || objs.length == 0) {
-            consecutiveFailures++;
-            System.out.println("Warning: api '" + api.name() + "' returned no objects (failure #" + consecutiveFailures + ").");
-          } else {
-            // reset failure streak on success
-            consecutiveFailures = 0;
-            for (ApiObject o : objs) {
-              if (o == null) continue;
-              list.add(o);
-              if (list.size() >= perApiTarget) break;
-            }
-          }
-        } catch (IOException e) {
-          consecutiveFailures++;
-          System.out.println("Warning: IOException while fetching from '" + api.name() + "': " + e.getMessage());
+        System.out.println("Waiting " + intervalMillis + "ms before next fetch...");
+        Thread.sleep(intervalMillis);
         } catch (InterruptedException e) {
-          Thread.currentThread().interrupt();
-          System.out.println("Fatal: interrupted while fetching from '" + api.name() + "'. Aborting.");
-          return;
-        } catch (RuntimeException e) {
-          consecutiveFailures++;
-          System.out.println("Warning: unexpected error while fetching from '" + api.name() + "': " + e.getMessage());
+        Thread.currentThread().interrupt();
+        System.out.println("Fatal: interrupted during interval sleep. Aborting.");
+        return;
         }
-
-        if (consecutiveFailures >= maxConsecutiveFailures) {
-          System.out.println("Fatal: too many consecutive failures for '" + api.name() + "' (>= " + maxConsecutiveFailures + "). Aborting run.");
-          return;
-        }
-
-        if (intervalMillis > 0 && list.size() < perApiTarget) {
-          try {
-            Thread.sleep(intervalMillis);
-          } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            System.out.println("Fatal: interrupted during interval sleep. Aborting.");
-            return;
-          }
-        }
+      }
       }
 
       collected.put(apiName, list);

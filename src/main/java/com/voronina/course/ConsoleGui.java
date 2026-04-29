@@ -2,44 +2,38 @@ package com.voronina.course;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
-
-import com.voronina.course.lastmessageapi.LastMessageApi;
-import com.voronina.course.randomuserapi.RandomUserApi;
-import com.voronina.course.chatsapi.ChatsApi;
 
 public class ConsoleGui {
     public void run() {
         try (Scanner sc = new Scanner(System.in)) {
             System.out.println("Interactive mode: configure data fetch and output");
 
-            // Choose APIs
+            // Choose APIs from registry
+            Map<String, ApiRegistry.ApiEntry> registry = ApiRegistry.all();
+            List<String> keys = new ArrayList<>(registry.keySet());
+
             System.out.println("Available APIs:");
-            System.out.println("  1) LastMessageApi (key: lastmessage)");
-            System.out.println("  2) RandomUserApi (key: randomuser)");
-            System.out.println("  3) ChatsApi (key: chats)");
-            System.out.print("Select APIs to run (comma-separated numbers or 'all') [all]: ");
+            for (int i = 0; i < keys.size(); i++) {
+                ApiRegistry.ApiEntry e = registry.get(keys.get(i));
+                System.out.printf("  %d) %s (key: %s)%n", i + 1, e.displayName(), e.key());
+            }
+            System.out.print("Select APIs to run (comma-separated numbers or keys, or 'all') [all]: ");
             String apisLine = sc.nextLine().trim();
+
             List<String> selectedKeys = new ArrayList<>();
             if (apisLine.isEmpty() || "all".equalsIgnoreCase(apisLine)) {
-                selectedKeys.add("lastmessage");
-                selectedKeys.add("randomuser");
-                selectedKeys.add("chats");
+                selectedKeys.addAll(keys);
             } else {
-                String[] parts = apisLine.split(",");
-                for (String p : parts) {
-                    p = p.trim();
-                    if (p.matches("\\d+")) {
-                        int idx = Integer.parseInt(p);
-                        switch (idx) {
-                            case 1: selectedKeys.add("lastmessage"); break;
-                            case 2: selectedKeys.add("randomuser"); break;
-                            case 3: selectedKeys.add("chats"); break;
-                            default: System.out.println("Unknown selection: " + p); break;
-                        }
+                for (String part : apisLine.split(",")) {
+                    part = part.trim();
+                    if (part.matches("\\d+")) {
+                        int idx = Integer.parseInt(part) - 1;
+                        if (idx >= 0 && idx < keys.size()) selectedKeys.add(keys.get(idx));
+                        else System.out.println("Unknown selection: " + (idx + 1));
                     } else {
-                        // allow entering keys directly
-                        selectedKeys.add(p);
+                        selectedKeys.add(part.toLowerCase());
                     }
                 }
             }
@@ -51,8 +45,7 @@ public class ConsoleGui {
 
             // Overwrite or append
             System.out.print("Write mode - create new or append? (new/append) [new]: ");
-            String mode = sc.nextLine().trim();
-            boolean overwrite = !"append".equalsIgnoreCase(mode);
+            boolean overwrite = !"append".equalsIgnoreCase(sc.nextLine().trim());
 
             // Output file name
             System.out.print("Base output file name [output]: ");
@@ -64,7 +57,8 @@ public class ConsoleGui {
             String cnt = sc.nextLine().trim();
             int objectsCount = 50;
             if (!cnt.isEmpty()) {
-                try { objectsCount = Integer.parseInt(cnt); } catch (NumberFormatException ex) { System.out.println("Invalid number, using 50"); }
+                try { objectsCount = Integer.parseInt(cnt); }
+                catch (NumberFormatException ex) { System.out.println("Invalid number, using 50"); }
             }
 
             // Interval
@@ -72,25 +66,28 @@ public class ConsoleGui {
             String intervalStr = sc.nextLine().trim();
             long intervalMillis = 0;
             if (!intervalStr.isEmpty()) {
-                try { intervalMillis = Long.parseLong(intervalStr); } catch (NumberFormatException ex) { System.out.println("Invalid number, using 0"); }
+                try { intervalMillis = Long.parseLong(intervalStr); }
+                catch (NumberFormatException ex) { System.out.println("Invalid number, using 0"); }
             }
 
             // Print options
             System.out.print("After run, print output to screen? (all/specific/none) [all]: ");
             String printOpt = sc.nextLine().trim();
-            String apiToPrint = ""; // blank means print all in ApiManager
-            if ("none".equalsIgnoreCase(printOpt)) apiToPrint = "__NONE__";
-            else if ("specific".equalsIgnoreCase(printOpt)) {
-                System.out.print("Enter api keys to print (comma-separated, e.g. randomuser,chats or names): ");
+            String apiToPrint;
+            if ("none".equalsIgnoreCase(printOpt)) {
+                apiToPrint = null;
+            } else if ("specific".equalsIgnoreCase(printOpt)) {
+                System.out.print("Enter api keys to print (comma-separated): ");
                 apiToPrint = sc.nextLine().trim();
             } else {
                 apiToPrint = "";
             }
 
-            // Build Api list
+            // Build Api list via registry
             List<Api> apis = new ArrayList<>();
+            System.out.println("Creating API instances...");
             for (String k : selectedKeys) {
-                Api api = createApiByKey(k.trim());
+                Api api = ApiRegistry.create(k);
                 if (api != null) apis.add(api);
                 else System.out.println("Warning: unknown api '" + k + "' - skipped");
             }
@@ -100,22 +97,8 @@ public class ConsoleGui {
                 return;
             }
 
-            // If user selected 'none' for printing, pass null to ApiManager to avoid printing
-            String printArg = apiToPrint.equals("__NONE__") ? null : apiToPrint;
-
-            ApiManager manager = new ApiManager();
-            manager.run(apis, format, outName, overwrite, printArg, objectsCount, intervalMillis);
-        }
-    }
-
-    private Api createApiByKey(String key) {
-        if (key == null) return null;
-        String k = key.trim().toLowerCase();
-        switch (k) {
-            case "lastmessage": case "last_message": case "lastmessageapi": case "last": return new LastMessageApi();
-            case "randomuser": case "random_user": case "randomuserapi": case "random": return new RandomUserApi();
-            case "chats": case "chat": case "chatsapi": return new ChatsApi();
-            default: return null;
+            System.out.println("Running API manager...");
+            new ApiManager().run(apis, format, outName, overwrite, apiToPrint, objectsCount, intervalMillis);
         }
     }
 }
