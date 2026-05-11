@@ -19,6 +19,11 @@ public class EmojiApi implements Api {
   }
 
   @Override
+  public String[] csvHeaders() {
+    return Emoji.CSV_HEADERS;
+  }
+
+  @Override
   public ApiObject[] fetchData() throws IOException, InterruptedException {
     HttpClient client = HttpClient.newHttpClient();
     HttpRequest request = HttpRequest.newBuilder(URI.create(API_URL))
@@ -31,6 +36,6 @@ public class EmojiApi implements Api {
     if (emoji == null) {
       throw new IllegalStateException("No emoji returned from API");
     }
-    return new ApiObject[]{ emoji };
+    return new ApiObject[] { emoji };
   }
 }

@@ -13,6 +13,11 @@ public class RandomUserApi implements Api {
   }
 
   @Override
+  public String[] csvHeaders() {
+    return RandomUser.CSV_HEADERS;
+  }
+
+  @Override
   public ApiObject[] fetchData() throws IOException, InterruptedException {
     java.net.http.HttpClient client = java.net.http.HttpClient.newHttpClient();
     java.net.http.HttpRequest request = java.net.http.HttpRequest.newBuilder(java.net.URI.create(API_URL))
@@ -23,6 +28,10 @@ public class RandomUserApi implements Api {
         java.net.http.HttpResponse.BodyHandlers.ofString());
     com.google.gson.Gson gson = new com.google.gson.GsonBuilder().serializeNulls().create();
     ResponseWrapper wrapper = gson.fromJson(response.body(), ResponseWrapper.class);
+    if (wrapper == null || wrapper.results == null) {
+      throw new IOException("Invalid response from RandomUserApi");
+    }
+
     return wrapper.results;
   }
 

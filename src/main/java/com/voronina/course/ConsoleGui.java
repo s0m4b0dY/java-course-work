@@ -30,8 +30,10 @@ public class ConsoleGui {
                     part = part.trim();
                     if (part.matches("\\d+")) {
                         int idx = Integer.parseInt(part) - 1;
-                        if (idx >= 0 && idx < keys.size()) selectedKeys.add(keys.get(idx));
-                        else System.out.println("Unknown selection: " + (idx + 1));
+                        if (idx >= 0 && idx < keys.size())
+                            selectedKeys.add(keys.get(idx));
+                        else
+                            System.out.println("Unknown selection: " + (idx + 1));
                     } else {
                         selectedKeys.add(part.toLowerCase());
                     }
@@ -50,30 +52,64 @@ public class ConsoleGui {
             // Output file name
             System.out.print("Base output file name [output]: ");
             String outName = sc.nextLine().trim();
-            if (outName.isEmpty()) outName = "output";
+            if (outName.isEmpty())
+                outName = "output";
 
             // Count
             System.out.print("Objects per API to fetch [50]: ");
             String cnt = sc.nextLine().trim();
             int objectsCount = 50;
             if (!cnt.isEmpty()) {
-                try { objectsCount = Integer.parseInt(cnt); }
-                catch (NumberFormatException ex) { System.out.println("Invalid number, using 50"); }
+                try {
+                    objectsCount = Integer.parseInt(cnt);
+                } catch (NumberFormatException ex) {
+                    System.out.println("Invalid number, using 50");
+                }
             }
 
-            // Interval
-            System.out.print("Interval between requests in milliseconds [0 = no delay]: ");
+            // Build Api list via registry
+            List<Api> apis = new ArrayList<>();
+            System.out.println("Creating API instances...");
+            for (String k : selectedKeys) {
+                Api api = ApiRegistry.create(k);
+                if (api != null)
+                    apis.add(api);
+                else
+                    System.out.println("Warning: unknown api '" + k + "' - skipped");
+            }
+
+            if (apis.isEmpty()) {
+                System.out.println("No APIs selected. Exiting.");
+                return;
+            }
+
+            System.out.print("Maximum simultaneously running tasks n [2]: ");
+            String threadsStr = sc.nextLine().trim();
+            int maxConcurrentTasks = 2;
+            if (!threadsStr.isEmpty()) {
+                try {
+                    maxConcurrentTasks = Integer.parseInt(threadsStr);
+                } catch (NumberFormatException ex) {
+                    System.out.println("Invalid number, using 2");
+                }
+            }
+
+            System.out.print("Polling interval t in seconds [5]: ");
             String intervalStr = sc.nextLine().trim();
-            long intervalMillis = 0;
+            long intervalSeconds = 5;
             if (!intervalStr.isEmpty()) {
-                try { intervalMillis = Long.parseLong(intervalStr); }
-                catch (NumberFormatException ex) { System.out.println("Invalid number, using 0"); }
+                try {
+                    intervalSeconds = Long.parseLong(intervalStr);
+                } catch (NumberFormatException ex) {
+                    System.out.println("Invalid number, using 5");
+                }
             }
 
-            // Print options
             System.out.print("After run, print output to screen? (all/specific/none) [all]: ");
             String printOpt = sc.nextLine().trim();
+
             String apiToPrint;
+
             if ("none".equalsIgnoreCase(printOpt)) {
                 apiToPrint = null;
             } else if ("specific".equalsIgnoreCase(printOpt)) {
@@ -83,22 +119,48 @@ public class ConsoleGui {
                 apiToPrint = "";
             }
 
-            // Build Api list via registry
-            List<Api> apis = new ArrayList<>();
-            System.out.println("Creating API instances...");
-            for (String k : selectedKeys) {
-                Api api = ApiRegistry.create(k);
-                if (api != null) apis.add(api);
-                else System.out.println("Warning: unknown api '" + k + "' - skipped");
-            }
+            System.out.println("Type 'start' to begin polling:");
+            String command = sc.nextLine().trim();
 
-            if (apis.isEmpty()) {
-                System.out.println("No APIs selected. Exiting.");
+            if (!"start".equalsIgnoreCase(command)) {
+                System.out.println("Polling was not started.");
                 return;
             }
 
-            System.out.println("Running API manager...");
-            new ApiManager().run(apis, format, outName, overwrite, apiToPrint, objectsCount, intervalMillis);
+            PollingConfig config = new PollingConfig(
+                    maxConcurrentTasks,
+                    intervalSeconds,
+                    objectsCount);
+
+            ThreadSafeOutputWriter writer = new ThreadSafeOutputWriter(
+                    apis,
+                    format,
+                    outName,
+                    overwrite);
+
+            ApiPollingManager pollingManager = new ApiPollingManager(
+                    apis,
+                    config,
+                    writer);
+
+            Runtime.getRuntime().addShutdownHook(new Thread(pollingManager::stop));
+
+            pollingManager.start();
+
+            System.out.println("Polling is running.");
+            System.out.println("Type 'stop' and press Enter to stop:");
+
+            while (true) {
+                String line = sc.nextLine().trim();
+
+                if ("stop".equalsIgnoreCase(line)) {
+                    pollingManager.stop();
+                    writer.printOutput(apiToPrint);
+                    break;
+                }
+
+                System.out.println("Unknown command. Type 'stop' to stop polling.");
+            }
         }
     }
 }

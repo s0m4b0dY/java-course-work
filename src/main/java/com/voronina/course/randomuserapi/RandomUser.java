@@ -5,7 +5,7 @@ import com.google.gson.GsonBuilder;
 import com.voronina.course.ApiObject;
 
 public class RandomUser implements ApiObject {
-  static final String[] CSV_HEADERS = {
+  public static final String[] CSV_HEADERS = {
       "gender",
       "title",
       "first",

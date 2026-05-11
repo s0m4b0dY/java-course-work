@@ -12,16 +12,24 @@ import com.voronina.course.Api;
 import com.voronina.course.ApiObject;
 
 public class FreepikApi implements Api {
-  private static final String API_KEY = "FPSXa86f3a1ce00580de012a30ffc2086b37";
+  private static final String API_KEY = "API_KEY";
   private static final String BASE_URL = "https://api.freepik.com/v1/icons";
   private static final int PER_PAGE = 10;
 
-  /** Current page — increments with each fetchData() call so ApiManager gets fresh items. */
+  /**
+   * Current page — increments with each fetchData() call so ApiManager gets fresh
+   * items.
+   */
   private int currentPage = 1;
 
   @Override
   public String name() {
     return "FreepikApi";
+  }
+
+  @Override
+  public String[] csvHeaders() {
+    return FreepikIcon.CSV_HEADERS;
   }
 
   @Override

@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class FreepikIcon implements ApiObject {
-  static final String[] CSV_HEADERS = {
+  public static final String[] CSV_HEADERS = {
       "id",
       "name",
       "slug",

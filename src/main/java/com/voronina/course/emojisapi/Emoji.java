@@ -7,7 +7,7 @@ import com.voronina.course.ApiObject;
 import java.util.List;
 
 public class Emoji implements ApiObject {
-	static final String[] CSV_HEADERS = new String[] {
+	public static final String[] CSV_HEADERS = new String[] {
 		"name",
 		"category",
 		"group",
