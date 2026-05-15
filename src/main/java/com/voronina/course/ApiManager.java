@@ -3,7 +3,6 @@ package com.voronina.course;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.io.BufferedReader;
-import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -22,7 +21,6 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
- 
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -35,18 +33,21 @@ public class ApiManager {
   private final String defaultOutputFileName = "output";
 
   /**
-   * Fetch up to objects_count items from each API and save them depending on format.
+   * Fetch up to objects_count items from each API and save them depending on
+   * format.
    * Assumptions:
-   * - If a fetch returns no objects or throws IOException/InterruptedException it's a failure.
-   * - After maxConsecutiveFailures consecutive failures for one API we abort with fatal message.
+   * - If a fetch returns no objects or throws IOException/InterruptedException
+   * it's a failure.
+   * - After maxConsecutiveFailures consecutive failures for one API we abort with
+   * fatal message.
    */
   public void run(List<Api> apis,
-                  OutputFileFormat outputFileFormat,
-                  String outputFileName,
-                  boolean overwrite,
-                  String apiToPrint,
-                  int objectsCount,
-                  long intervalMillis) {
+      OutputFileFormat outputFileFormat,
+      String outputFileName,
+      boolean overwrite,
+      String apiToPrint,
+      int objectsCount,
+      long intervalMillis) {
     final int perApiTarget = objectsCount > 0 ? objectsCount : defaultObjectsCount;
     final int maxConsecutiveFailures = 5; // reasonable default
 
@@ -60,49 +61,53 @@ public class ApiManager {
       System.out.println("Starting fetch from API: " + api.name() + " (target: " + perApiTarget + " objects)");
 
       while (list.size() < perApiTarget) {
-      try {
-        System.out.println("Fetching from '" + api.name() + "' (current: " + list.size() + "/" + perApiTarget + ")");
-        ApiObject[] objs = api.fetchData();
-        if (objs == null || objs.length == 0) {
-        consecutiveFailures++;
-        System.out.println("Warning: api '" + api.name() + "' returned no objects (failure #" + consecutiveFailures + ").");
-        } else {
-        // reset failure streak on success
-        consecutiveFailures = 0;
-        System.out.println("Successfully fetched " + objs.length + " objects from '" + api.name() + "'");
-        for (ApiObject o : objs) {
-          if (o == null) continue;
-          list.add(o);
-          if (list.size() >= perApiTarget) break;
-        }
-        }
-      } catch (IOException e) {
-        consecutiveFailures++;
-        System.out.println("Warning: IOException while fetching from '" + api.name() + "': " + e.getMessage());
-      } catch (InterruptedException e) {
-        Thread.currentThread().interrupt();
-        System.out.println("Fatal: interrupted while fetching from '" + api.name() + "'. Aborting.");
-        return;
-      } catch (RuntimeException e) {
-        consecutiveFailures++;
-        System.out.println("Warning: unexpected error while fetching from '" + api.name() + "': " + e.getMessage());
-      }
-
-      if (consecutiveFailures >= maxConsecutiveFailures) {
-        System.out.println("Fatal: too many consecutive failures for '" + api.name() + "' (>= " + maxConsecutiveFailures + "). Aborting run.");
-        return;
-      }
-
-      if (intervalMillis > 0 && list.size() < perApiTarget) {
         try {
-        System.out.println("Waiting " + intervalMillis + "ms before next fetch...");
-        Thread.sleep(intervalMillis);
+          System.out.println("Fetching from '" + api.name() + "' (current: " + list.size() + "/" + perApiTarget + ")");
+          ApiObject[] objs = api.fetchData();
+          if (objs == null || objs.length == 0) {
+            consecutiveFailures++;
+            System.out.println(
+                "Warning: api '" + api.name() + "' returned no objects (failure #" + consecutiveFailures + ").");
+          } else {
+            // reset failure streak on success
+            consecutiveFailures = 0;
+            System.out.println("Successfully fetched " + objs.length + " objects from '" + api.name() + "'");
+            for (ApiObject o : objs) {
+              if (o == null)
+                continue;
+              list.add(o);
+              if (list.size() >= perApiTarget)
+                break;
+            }
+          }
+        } catch (IOException e) {
+          consecutiveFailures++;
+          System.out.println("Warning: IOException while fetching from '" + api.name() + "': " + e.getMessage());
         } catch (InterruptedException e) {
-        Thread.currentThread().interrupt();
-        System.out.println("Fatal: interrupted during interval sleep. Aborting.");
-        return;
+          Thread.currentThread().interrupt();
+          System.out.println("Fatal: interrupted while fetching from '" + api.name() + "'. Aborting.");
+          return;
+        } catch (RuntimeException e) {
+          consecutiveFailures++;
+          System.out.println("Warning: unexpected error while fetching from '" + api.name() + "': " + e.getMessage());
         }
-      }
+
+        if (consecutiveFailures >= maxConsecutiveFailures) {
+          System.out.println("Fatal: too many consecutive failures for '" + api.name() + "' (>= "
+              + maxConsecutiveFailures + "). Aborting run.");
+          return;
+        }
+
+        if (intervalMillis > 0 && list.size() < perApiTarget) {
+          try {
+            System.out.println("Waiting " + intervalMillis + "ms before next fetch...");
+            Thread.sleep(intervalMillis);
+          } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            System.out.println("Fatal: interrupted during interval sleep. Aborting.");
+            return;
+          }
+        }
       }
 
       collected.put(apiName, list);
@@ -168,92 +173,239 @@ public class ApiManager {
   }
 
   private void writeCsv(Map<String, List<ApiObject>> collected, String outputFileName, boolean overwrite) {
-    // Build unified header: UUID, source, timestamp, then api1_field1, api1_field2, api2_field1, ...
-    List<String> allHeaders = new ArrayList<>();
-    allHeaders.add("UUID");
-    allHeaders.add("source");
-    allHeaders.add("timestamp");
-
-    // remember per-api field names and their offset in the row
-    Map<String, String[]> apiFieldNames = new LinkedHashMap<>();
-    for (Map.Entry<String, List<ApiObject>> e : collected.entrySet()) {
-      if (!e.getValue().isEmpty()) {
-        String apiName = e.getKey();
-        String[] fields = e.getValue().get(0).csvHeaders();
-        apiFieldNames.put(apiName, fields);
-        for (String f : fields) {
-          allHeaders.add(apiName + "_" + f);
-        }
-      }
-    }
-
-    String[] headers = allHeaders.toArray(new String[0]);
     Path out = Paths.get(outputFileName + ".csv");
-    String timestamp = ZonedDateTime.now(ZoneOffset.UTC).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
 
-    boolean fileExists = Files.exists(out);
-    boolean shouldOverwrite = overwrite || !fileExists;
+    JsonArray root = new JsonArray();
 
-    // If appending, verify that the existing header row matches the new one.
-    // If they differ, overwrite the whole file instead.
-    if (!shouldOverwrite) {
-      try {
-        String existingHeader = Files.lines(out, StandardCharsets.UTF_8).findFirst().orElse("");
-        StringWriter sw = new StringWriter();
-        try (CSVPrinter hp = new CSVPrinter(sw, CSVFormat.DEFAULT)) {
-          hp.printRecord((Object[]) headers);
-        }
-        String newHeaderLine = sw.toString().trim();
-        if (!existingHeader.trim().equals(newHeaderLine)) {
-          System.out.println("Warning: CSV headers changed for '" + outputFileName + ".csv', overwriting the file.");
-          shouldOverwrite = true;
+    // source -> csv fields
+    Map<String, List<String>> apiFieldNames = new LinkedHashMap<>();
+
+    /*
+     * Step 1:
+     * If we are not overwriting, read the old CSV and convert it into
+     * JSON-like objects:
+     *
+     * {
+     * "id": "...",
+     * "source": "...",
+     * "timestamp": "...",
+     * "data": {
+     * "field1": "...",
+     * "field2": "..."
+     * }
+     * }
+     */
+    if (!overwrite && Files.exists(out)) {
+      try (BufferedReader reader = Files.newBufferedReader(out, StandardCharsets.UTF_8);
+          CSVParser parser = CSVFormat.DEFAULT.builder()
+              .setHeader()
+              .setSkipHeaderRecord(true)
+              .build()
+              .parse(reader)) {
+
+        List<String> headers = parser.getHeaderNames();
+
+        for (CSVRecord record : parser) {
+          String source = safeCsvGet(record, "source");
+          if (source.isBlank()) {
+            continue;
+          }
+
+          String id = safeCsvGet(record, "UUID");
+          if (id.isBlank()) {
+            id = UUID.randomUUID().toString();
+          }
+
+          String timestamp = safeCsvGet(record, "timestamp");
+
+          JsonObject data = new JsonObject();
+
+          String prefix = source + "_";
+
+          for (String header : headers) {
+            if (header.equals("UUID") || header.equals("source") || header.equals("timestamp")) {
+              continue;
+            }
+
+            if (!header.startsWith(prefix)) {
+              continue;
+            }
+
+            String fieldName = header.substring(prefix.length());
+            String value = safeCsvGet(record, header);
+
+            data.addProperty(fieldName, value);
+            addFieldName(apiFieldNames, source, fieldName);
+          }
+
+          JsonObject envelope = new JsonObject();
+          envelope.addProperty("id", id);
+          envelope.addProperty("source", source);
+          envelope.addProperty("timestamp", timestamp);
+          envelope.add("data", data);
+
+          root.add(envelope);
         }
       } catch (IOException ex) {
         throw new UncheckedIOException(ex);
       }
     }
 
-    StandardOpenOption[] options = shouldOverwrite
-        ? new StandardOpenOption[]{StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING}
-        : new StandardOpenOption[]{StandardOpenOption.CREATE, StandardOpenOption.APPEND};
+    /*
+     * Step 2:
+     * Add newly fetched API objects into the same JSON-like array.
+     *
+     * Important:
+     * We use csvHeaders() + toCsvFields() here instead of Gson object fields,
+     * because CSV format is controlled by these two methods.
+     */
+    String timestamp = ZonedDateTime.now(ZoneOffset.UTC).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
 
-    try (BufferedWriter writer = Files.newBufferedWriter(out, StandardCharsets.UTF_8, options);
-         CSVPrinter printer = new CSVPrinter(writer, CSVFormat.DEFAULT)) {
+    for (Map.Entry<String, List<ApiObject>> e : collected.entrySet()) {
+      String apiName = e.getKey();
 
-      // Write header only when creating / overwriting (not when appending to a valid file)
-      if (shouldOverwrite || !fileExists) {
-        printer.printRecord((Object[]) headers);
+      for (ApiObject obj : e.getValue()) {
+        if (obj == null) {
+          continue;
+        }
+
+        String[] headers = obj.csvHeaders();
+        String[] values = obj.toCsvFields();
+
+        JsonObject data = new JsonObject();
+
+        for (int i = 0; i < headers.length; ++i) {
+          String fieldName = headers[i];
+          String value = i < values.length ? values[i] : "";
+
+          data.addProperty(fieldName, value);
+          addFieldName(apiFieldNames, apiName, fieldName);
+        }
+
+        JsonObject envelope = new JsonObject();
+        envelope.addProperty("id", UUID.randomUUID().toString());
+        envelope.addProperty("source", apiName);
+        envelope.addProperty("timestamp", timestamp);
+        envelope.add("data", data);
+
+        root.add(envelope);
       }
+    }
 
-      for (Map.Entry<String, List<ApiObject>> e : collected.entrySet()) {
-        String apiName = e.getKey();
-        if (!apiFieldNames.containsKey(apiName)) continue;
-        String[] apiFields = apiFieldNames.get(apiName);
+    /*
+     * Step 3:
+     * Build a new full CSV header from all known APIs and fields.
+     */
+    List<String> allHeaders = new ArrayList<>();
+    allHeaders.add("UUID");
+    allHeaders.add("source");
+    allHeaders.add("timestamp");
 
-        // Calculate the column offset for this API's data fields
-        int offset = 3; // UUID + source + timestamp
-        for (Map.Entry<String, String[]> ae : apiFieldNames.entrySet()) {
-          if (ae.getKey().equals(apiName)) break;
-          offset += ae.getValue().length;
+    for (Map.Entry<String, List<String>> e : apiFieldNames.entrySet()) {
+      String apiName = e.getKey();
+
+      for (String fieldName : e.getValue()) {
+        allHeaders.add(apiName + "_" + fieldName);
+      }
+    }
+
+    String[] headers = allHeaders.toArray(new String[0]);
+
+    /*
+     * Step 4:
+     * Write the whole CSV back from JSON-like data.
+     */
+    try (BufferedWriter writer = Files.newBufferedWriter(
+        out,
+        StandardCharsets.UTF_8,
+        StandardOpenOption.CREATE,
+        StandardOpenOption.TRUNCATE_EXISTING);
+        CSVPrinter printer = new CSVPrinter(writer, CSVFormat.DEFAULT)) {
+
+      printer.printRecord((Object[]) headers);
+
+      for (JsonElement element : root) {
+        if (!element.isJsonObject()) {
+          continue;
         }
 
-        for (ApiObject obj : e.getValue()) {
-          String[] values = obj.toCsvFields();
-          Object[] row = new Object[headers.length]; // all null → empty cells
-          row[0] = UUID.randomUUID().toString();
-          row[1] = apiName;
-          row[2] = timestamp;
-          for (int i = 0; i < values.length && i < apiFields.length; i++) {
-            row[offset + i] = values[i];
+        JsonObject envelope = element.getAsJsonObject();
+
+        String id = getStringOrDefault(envelope, "id", UUID.randomUUID().toString());
+        String source = getStringOrDefault(envelope, "source", "");
+        String rowTimestamp = getStringOrDefault(envelope, "timestamp", "");
+
+        JsonObject data = new JsonObject();
+        if (envelope.has("data") && envelope.get("data").isJsonObject()) {
+          data = envelope.getAsJsonObject("data");
+        }
+
+        Object[] row = new Object[headers.length];
+
+        row[0] = id;
+        row[1] = source;
+        row[2] = rowTimestamp;
+
+        for (int i = 3; i < headers.length; ++i) {
+          String header = headers[i];
+          String prefix = source + "_";
+
+          if (!header.startsWith(prefix)) {
+            row[i] = "";
+            continue;
           }
-          printer.printRecord(row);
+
+          String fieldName = header.substring(prefix.length());
+
+          if (data.has(fieldName) && !data.get(fieldName).isJsonNull()) {
+            JsonElement value = data.get(fieldName);
+
+            if (value.isJsonPrimitive()) {
+              row[i] = value.getAsString();
+            } else {
+              row[i] = value.toString();
+            }
+          } else {
+            row[i] = "";
+          }
         }
+
+        printer.printRecord(row);
       }
 
       System.out.println("Wrote CSV output to " + out.toAbsolutePath());
     } catch (IOException ex) {
       throw new UncheckedIOException(ex);
     }
+  }
+
+  private static void addFieldName(Map<String, List<String>> apiFieldNames, String apiName, String fieldName) {
+    List<String> fields = apiFieldNames.computeIfAbsent(apiName, k -> new ArrayList<>());
+
+    if (!fields.contains(fieldName)) {
+      fields.add(fieldName);
+    }
+  }
+
+  private static String safeCsvGet(CSVRecord record, String name) {
+    try {
+      if (!record.isMapped(name)) {
+        return "";
+      }
+
+      String value = record.get(name);
+      return value == null ? "" : value;
+    } catch (IllegalArgumentException ex) {
+      return "";
+    }
+  }
+
+  private static String getStringOrDefault(JsonObject object, String fieldName, String defaultValue) {
+    if (!object.has(fieldName) || object.get(fieldName).isJsonNull()) {
+      return defaultValue;
+    }
+
+    return object.get(fieldName).getAsString();
   }
 
   private void printJsonOutput(String baseName, String apiToPrint) {
@@ -315,12 +467,13 @@ public class ApiManager {
 
       // Collect requested source keys (sanitized)
       List<String> keys = new ArrayList<>();
-      for (String s : apiToPrint.split(",")) keys.add(sanitizeName(s.trim()));
+      for (String s : apiToPrint.split(","))
+        keys.add(sanitizeName(s.trim()));
 
       // Use CSVParser to read; re-print header + matching rows via CSVPrinter
       try (BufferedReader reader = Files.newBufferedReader(out, StandardCharsets.UTF_8);
-           CSVParser parser = CSVFormat.DEFAULT.builder().setHeader().setSkipHeaderRecord(true).build().parse(reader);
-           CSVPrinter printer = new CSVPrinter(new java.io.OutputStreamWriter(System.out), CSVFormat.DEFAULT)) {
+          CSVParser parser = CSVFormat.DEFAULT.builder().setHeader().setSkipHeaderRecord(true).build().parse(reader);
+          CSVPrinter printer = new CSVPrinter(new java.io.OutputStreamWriter(System.out), CSVFormat.DEFAULT)) {
 
         printer.printRecord(parser.getHeaderNames().toArray());
         for (CSVRecord record : parser) {
@@ -337,7 +490,8 @@ public class ApiManager {
   }
 
   private static String sanitizeName(String name) {
-    if (name == null) return "api";
+    if (name == null)
+      return "api";
     return name.replaceAll("[^A-Za-z0-9_-]", "_").toLowerCase();
   }
 }

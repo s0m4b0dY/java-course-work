@@ -1,11 +1,10 @@
 package com.voronina.course;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 public class Main {
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) {
         boolean runAuto = false;
         OutputFileFormat format = OutputFileFormat.JSON;
         String outputName = "output";
