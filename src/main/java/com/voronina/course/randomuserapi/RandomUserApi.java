@@ -2,32 +2,30 @@ package com.voronina.course.randomuserapi;
 
 import java.io.IOException;
 
-import com.voronina.course.Api;
+import com.voronina.course.AbstractJsonApi;
 import com.voronina.course.ApiObject;
 
-public class RandomUserApi implements Api {
-  private static final String API_URL = "https://randomuser.me/api/";
+public class RandomUserApi extends AbstractJsonApi {
+    private static final String API_URL = "https://randomuser.me/api/";
 
-  public String name() {
-    return "RandomUserApi";
-  }
+    @Override
+    public String name() {
+        return "RandomUserApi";
+    }
 
-  @Override
-  public ApiObject[] fetchData() throws IOException, InterruptedException {
-    java.net.http.HttpClient client = java.net.http.HttpClient.newHttpClient();
-    java.net.http.HttpRequest request = java.net.http.HttpRequest.newBuilder(java.net.URI.create(API_URL))
-        .GET()
-        .build();
+    @Override
+    public ApiObject[] fetchData() throws IOException, InterruptedException {
+        String json = getJson(API_URL);
+        ResponseWrapper wrapper = gson().fromJson(json, ResponseWrapper.class);
 
-    java.net.http.HttpResponse<String> response = client.send(request,
-        java.net.http.HttpResponse.BodyHandlers.ofString());
-    com.google.gson.Gson gson = new com.google.gson.GsonBuilder().serializeNulls().create();
-    ResponseWrapper wrapper = gson.fromJson(response.body(), ResponseWrapper.class);
-    return wrapper.results;
-  }
+        if (wrapper == null || wrapper.results == null || wrapper.results.length == 0) {
+            throw new IllegalStateException("No users returned from RandomUserApi");
+        }
 
-  // Minimal wrapper matching randomuser.me response
-  private static class ResponseWrapper {
-    RandomUser[] results;
-  }
+        return wrapper.results;
+    }
+
+    private static class ResponseWrapper {
+        RandomUser[] results;
+    }
 }

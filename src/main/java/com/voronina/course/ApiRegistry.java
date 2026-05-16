@@ -1,52 +1,35 @@
 package com.voronina.course;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 import com.voronina.course.emojisapi.EmojiApi;
 import com.voronina.course.freepikapi.FreepikApi;
 import com.voronina.course.randomuserapi.RandomUserApi;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
-
-/**
- * Central registry of all available API implementations.
- * To add a new API: add one entry to REGISTRY below — nothing else needs to change.
- */
 public class ApiRegistry {
 
-  /** Ordered map: display-name → factory lambda */
-  private static final Map<String, ApiEntry> REGISTRY = new LinkedHashMap<>();
+    public record ApiEntry(String key, String displayName) {}
 
-  static {
-    register("randomuser", "RandomUserApi", RandomUserApi::new);
-    register("emoji",      "EmojiApi",      EmojiApi::new);
-    register("freepik",    "FreepikApi",    FreepikApi::new);
-  }
+    public static List<ApiEntry> all() {
+        List<ApiEntry> result = new ArrayList<>();
 
-  // -------------------------------------------------------------------------
+        result.add(new ApiEntry("randomuser", "RandomUserApi"));
+        result.add(new ApiEntry("emoji",      "EmojiApi"));
+        result.add(new ApiEntry("freepik",    "FreepikApi"));
 
-  public record ApiEntry(String key, String displayName, ApiFactory factory) {}
+        return Collections.unmodifiableList(result);
+    }
 
-  @FunctionalInterface
-  public interface ApiFactory {
-    Api create();
-  }
+    public static Api create(String key) {
+        if (key == null) return null;
+        String lowerKey = key.trim().toLowerCase();
 
-  private static void register(String key, String displayName, ApiFactory factory) {
-    REGISTRY.put(key.toLowerCase(), new ApiEntry(key.toLowerCase(), displayName, factory));
-  }
+        if (lowerKey.equals("randomuser")) return new RandomUserApi();
+        if (lowerKey.equals("emoji"))      return new EmojiApi();
+        if (lowerKey.equals("freepik"))    return new FreepikApi();
 
-  /** All registered entries in insertion order. */
-  public static Map<String, ApiEntry> all() {
-    return java.util.Collections.unmodifiableMap(REGISTRY);
-  }
-
-  /**
-   * Create an Api instance by key (case-insensitive).
-   * Returns null if the key is unknown.
-   */
-  public static Api create(String key) {
-    if (key == null) return null;
-    ApiEntry entry = REGISTRY.get(key.trim().toLowerCase());
-    return entry != null ? entry.factory().create() : null;
-  }
+        return null;
+    }
 }

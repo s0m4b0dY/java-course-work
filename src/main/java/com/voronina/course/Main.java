@@ -37,9 +37,8 @@ public class Main {
         if (runAuto) {
             List<Api> apis = new ArrayList<>();
             if (apisArg == null || apisArg.isBlank()) {
-                // all registered APIs
-                for (ApiRegistry.ApiEntry e : ApiRegistry.all().values()) {
-                    apis.add(e.factory().create());
+                for (ApiRegistry.ApiEntry e : ApiRegistry.all()) {
+                    apis.add(ApiRegistry.create(e.key()));
                 }
             } else {
                 for (String k : apisArg.split(",")) {

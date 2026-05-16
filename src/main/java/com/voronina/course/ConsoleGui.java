@@ -2,7 +2,6 @@ package com.voronina.course;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Scanner;
 
 public class ConsoleGui {
@@ -10,13 +9,11 @@ public class ConsoleGui {
         try (Scanner sc = new Scanner(System.in)) {
             System.out.println("Interactive mode: configure data fetch and output");
 
-            // Choose APIs from registry
-            Map<String, ApiRegistry.ApiEntry> registry = ApiRegistry.all();
-            List<String> keys = new ArrayList<>(registry.keySet());
+            List<ApiRegistry.ApiEntry> registry = ApiRegistry.all();
 
             System.out.println("Available APIs:");
-            for (int i = 0; i < keys.size(); i++) {
-                ApiRegistry.ApiEntry e = registry.get(keys.get(i));
+            for (int i = 0; i < registry.size(); i++) {
+                ApiRegistry.ApiEntry e = registry.get(i);
                 System.out.printf("  %d) %s (key: %s)%n", i + 1, e.displayName(), e.key());
             }
             System.out.print("Select APIs to run (comma-separated numbers or keys, or 'all') [all]: ");
@@ -24,53 +21,59 @@ public class ConsoleGui {
 
             List<String> selectedKeys = new ArrayList<>();
             if (apisLine.isEmpty() || "all".equalsIgnoreCase(apisLine)) {
-                selectedKeys.addAll(keys);
+                for (ApiRegistry.ApiEntry entry : registry) {
+                    selectedKeys.add(entry.key());
+                }
             } else {
                 for (String part : apisLine.split(",")) {
                     part = part.trim();
                     if (part.matches("\\d+")) {
                         int idx = Integer.parseInt(part) - 1;
-                        if (idx >= 0 && idx < keys.size()) selectedKeys.add(keys.get(idx));
-                        else System.out.println("Unknown selection: " + (idx + 1));
+                        if (idx >= 0 && idx < registry.size()) {
+                            selectedKeys.add(registry.get(idx).key());
+                        } else {
+                            System.out.println("Unknown selection: " + (idx + 1));
+                        }
                     } else {
                         selectedKeys.add(part.toLowerCase());
                     }
                 }
             }
 
-            // Format
             System.out.print("Output format (json/csv) [json]: ");
             String fmt = sc.nextLine().trim();
             OutputFileFormat format = "csv".equalsIgnoreCase(fmt) ? OutputFileFormat.CSV : OutputFileFormat.JSON;
 
-            // Overwrite or append
             System.out.print("Write mode - create new or append? (new/append) [new]: ");
             boolean overwrite = !"append".equalsIgnoreCase(sc.nextLine().trim());
 
-            // Output file name
             System.out.print("Base output file name [output]: ");
             String outName = sc.nextLine().trim();
-            if (outName.isEmpty()) outName = "output";
+            if (outName.isEmpty())
+                outName = "output";
 
-            // Count
             System.out.print("Objects per API to fetch [50]: ");
             String cnt = sc.nextLine().trim();
             int objectsCount = 50;
             if (!cnt.isEmpty()) {
-                try { objectsCount = Integer.parseInt(cnt); }
-                catch (NumberFormatException ex) { System.out.println("Invalid number, using 50"); }
+                try {
+                    objectsCount = Integer.parseInt(cnt);
+                } catch (NumberFormatException ex) {
+                    System.out.println("Invalid number, using 50");
+                }
             }
 
-            // Interval
             System.out.print("Interval between requests in milliseconds [0 = no delay]: ");
             String intervalStr = sc.nextLine().trim();
             long intervalMillis = 0;
             if (!intervalStr.isEmpty()) {
-                try { intervalMillis = Long.parseLong(intervalStr); }
-                catch (NumberFormatException ex) { System.out.println("Invalid number, using 0"); }
+                try {
+                    intervalMillis = Long.parseLong(intervalStr);
+                } catch (NumberFormatException ex) {
+                    System.out.println("Invalid number, using 0");
+                }
             }
 
-            // Print options
             System.out.print("After run, print output to screen? (all/specific/none) [all]: ");
             String printOpt = sc.nextLine().trim();
             String apiToPrint;
@@ -83,13 +86,14 @@ public class ConsoleGui {
                 apiToPrint = "";
             }
 
-            // Build Api list via registry
             List<Api> apis = new ArrayList<>();
             System.out.println("Creating API instances...");
             for (String k : selectedKeys) {
                 Api api = ApiRegistry.create(k);
-                if (api != null) apis.add(api);
-                else System.out.println("Warning: unknown api '" + k + "' - skipped");
+                if (api != null)
+                    apis.add(api);
+                else
+                    System.out.println("Warning: unknown api '" + k + "' - skipped");
             }
 
             if (apis.isEmpty()) {
