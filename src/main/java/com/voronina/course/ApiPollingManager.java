@@ -86,6 +86,10 @@ public class ApiPollingManager implements AutoCloseable {
       workers.shutdownNow();
     }
 
+    for (int i = 0; i < finishedLatch.getCount(); i++) {
+      finishedLatch.countDown();
+    }
+
     System.out.println("Polling stopped.");
   }
 

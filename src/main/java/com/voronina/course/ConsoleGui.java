@@ -8,6 +8,7 @@ import java.util.Scanner;
 public class ConsoleGui {
     public void run() {
         try (Scanner sc = new Scanner(System.in)) {
+
             System.out.println("Interactive mode: configure data fetch and output");
 
             // Choose APIs from registry
@@ -142,17 +143,39 @@ public class ConsoleGui {
                     apis,
                     config,
                     writer)) {
+
                 Runtime.getRuntime().addShutdownHook(new Thread(pollingManager::stop));
 
                 pollingManager.start();
 
-                System.out.println("Polling is running. Press Ctrl+C to stop early.");
+                System.out.println("Polling is running.");
+                System.out.println("Type 'stop' and press Enter to stop early.");
+
+                Thread stopThread = new Thread(() -> {
+                    while (pollingManager.isRunning()) {
+                        try {
+                            String line = sc.nextLine().trim();
+
+                            if ("stop".equalsIgnoreCase(line)) {
+                                System.out.println("Stop requested...");
+                                pollingManager.stop();
+                                break;
+                            } else {
+                                System.out.println("Unknown command. Type 'stop' to stop polling.");
+                            }
+                        } catch (Exception ex) {
+                            break;
+                        }
+                    }
+                });
+
+                stopThread.setDaemon(true);
+                stopThread.start();
 
                 pollingManager.awaitCompletion();
             }
 
             System.out.println("Polling is done");
-
             writer.printOutput(apiToPrint);
         }
     }
