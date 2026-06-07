@@ -9,8 +9,8 @@ class PollingConfigTest {
   void constructorFixesTooSmallNumbers() {
     PollingConfig config = new PollingConfig(0, -5, 0);
 
-    assertEquals(1, config.maxConcurrentTasks());
-    assertEquals(0, config.intervalSeconds());
+    assertEquals(1, config.getMaxConcurrentTasks());
+    assertEquals(0, config.getIntervalSeconds());
     assertTrue(config.isInfinite());
   }
 
@@ -18,7 +18,7 @@ class PollingConfigTest {
   void positiveCountIsNotInfinite() {
     PollingConfig config = new PollingConfig(2, 1, 5);
 
-    assertEquals(5, config.maxObjectsPerApi());
+    assertEquals(5, config.getMaxObjectsPerApi());
     assertFalse(config.isInfinite());
   }
 }

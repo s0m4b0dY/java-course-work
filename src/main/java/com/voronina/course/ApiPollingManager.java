@@ -40,7 +40,7 @@ public class ApiPollingManager implements AutoCloseable {
     this.outputWriter = outputWriter;
 
     this.scheduler = Executors.newScheduledThreadPool(Math.max(1, apis.size()));
-    this.workers = Executors.newFixedThreadPool(config.maxConcurrentTasks());
+    this.workers = Executors.newFixedThreadPool(config.getMaxConcurrentTasks());
 
     this.finishedLatch = new CountDownLatch(apis.size());
 
@@ -59,8 +59,8 @@ public class ApiPollingManager implements AutoCloseable {
     }
 
     System.out.println("Polling started.");
-    System.out.println("Max concurrent tasks: " + config.maxConcurrentTasks());
-    System.out.println("Interval after each completed request: " + config.intervalSeconds() + " seconds");
+    System.out.println("Max concurrent tasks: " + config.getMaxConcurrentTasks());
+    System.out.println("Interval after each completed request: " + config.getIntervalSeconds() + " seconds");
 
     for (Api api : apis) {
       scheduleNext(api, 0);
@@ -168,7 +168,7 @@ public class ApiPollingManager implements AutoCloseable {
          * "Повторный опрос одного и того же API должен происходить не чаще,
          * чем через t секунд после завершения предыдущего запроса"
          */
-        scheduleNext(api, config.intervalSeconds());
+        scheduleNext(api, config.getIntervalSeconds());
       } else {
         finishedLatch.countDown();
       }
@@ -181,7 +181,7 @@ public class ApiPollingManager implements AutoCloseable {
     }
 
     int alreadyFetched = fetchedPerApi.get(apiName).get();
-    int remaining = config.maxObjectsPerApi() - alreadyFetched;
+    int remaining = config.getMaxObjectsPerApi() - alreadyFetched;
 
     if (remaining <= 0) {
       return List.of();
@@ -200,7 +200,7 @@ public class ApiPollingManager implements AutoCloseable {
     }
 
     AtomicInteger counter = fetchedPerApi.get(api.name());
-    return counter != null && counter.get() >= config.maxObjectsPerApi();
+    return counter != null && counter.get() >= config.getMaxObjectsPerApi();
   }
 
   private static String sanitizeName(String name) {

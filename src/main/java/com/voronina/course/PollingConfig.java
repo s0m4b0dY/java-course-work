@@ -11,15 +11,15 @@ public class PollingConfig {
     this.maxObjectsPerApi = maxObjectsPerApi;
   }
 
-  public int maxConcurrentTasks() {
+  public int getMaxConcurrentTasks() {
     return maxConcurrentTasks;
   }
 
-  public long intervalSeconds() {
+  public long getIntervalSeconds() {
     return intervalSeconds;
   }
 
-  public int maxObjectsPerApi() {
+  public int getMaxObjectsPerApi() {
     return maxObjectsPerApi;
   }
 
