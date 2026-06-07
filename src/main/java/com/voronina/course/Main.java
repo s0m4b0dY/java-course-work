@@ -40,7 +40,9 @@ public class Main {
                     pollingManager.stop();
                     writer.printOutput(options.apiToPrint);
                 } else {
+                    Runtime.getRuntime().addShutdownHook(new Thread(() -> writer.printOutput(options.apiToPrint)));
                     System.out.println("Infinite polling mode. Press Ctrl+C to stop.");
+                    pollingManager.awaitCompletion();
                 }
             }
 
