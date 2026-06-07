@@ -138,29 +138,22 @@ public class ConsoleGui {
                     outName,
                     overwrite);
 
-            ApiPollingManager pollingManager = new ApiPollingManager(
+            try (ApiPollingManager pollingManager = new ApiPollingManager(
                     apis,
                     config,
-                    writer);
+                    writer)) {
+                Runtime.getRuntime().addShutdownHook(new Thread(pollingManager::stop));
 
-            Runtime.getRuntime().addShutdownHook(new Thread(pollingManager::stop));
+                pollingManager.start();
 
-            pollingManager.start();
+                System.out.println("Polling is running. Press Ctrl+C to stop early.");
 
-            System.out.println("Polling is running.");
-            System.out.println("Type 'stop' and press Enter to stop:");
-
-            while (true) {
-                String line = sc.nextLine().trim();
-
-                if ("stop".equalsIgnoreCase(line)) {
-                    pollingManager.stop();
-                    writer.printOutput(apiToPrint);
-                    break;
-                }
-
-                System.out.println("Unknown command. Type 'stop' to stop polling.");
+                pollingManager.awaitCompletion();
             }
+
+            System.out.println("Polling is done");
+
+            writer.printOutput(apiToPrint);
         }
     }
 }

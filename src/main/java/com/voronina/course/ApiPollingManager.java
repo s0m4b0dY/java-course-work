@@ -49,6 +49,10 @@ public class ApiPollingManager implements AutoCloseable {
     }
   }
 
+  public boolean isRunning() {
+    return running.get();
+  }
+
   public void start() {
     if (!running.compareAndSet(false, true)) {
       return;

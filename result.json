@@ -1,0 +1,190 @@
+[
+  {
+    "id": "dc4b413a-41b9-420e-a5a9-795ccda495ab",
+    "source": "emojiapi",
+    "timestamp": "2026-06-06T14:25:29.355720404Z",
+    "data": {
+      "name": "money-mouth face",
+      "category": "smileys and people",
+      "group": "face neutral",
+      "htmlCode": [
+        "\u0026#129297;"
+      ],
+      "unicode": [
+        "U+1F911"
+      ]
+    }
+  },
+  {
+    "id": "45226987-5dee-48a1-ba5b-f03d2e01688c",
+    "source": "randomuserapi",
+    "timestamp": "2026-06-06T14:25:29.635661899Z",
+    "data": {
+      "gender": "male",
+      "name": {
+        "title": "Mr",
+        "first": "Ronald",
+        "last": "Obrien"
+      },
+      "location": {
+        "street": {
+          "number": 9422,
+          "name": "Camden Ave"
+        },
+        "city": "Orange"
+      },
+      "email": "ronald.obrien@example.com",
+      "login": {
+        "uuid": "da0f1ad0-46a5-46c2-b4c4-7b7b31985042",
+        "username": "silverelephant540",
+        "password": "dark"
+      },
+      "registered": {
+        "date": "2011-10-28T06:26:06.343Z",
+        "age": 14
+      },
+      "phone": "02-0553-0215",
+      "cell": "0447-458-133",
+      "id": {
+        "name": "TFN",
+        "value": "649262457"
+      }
+    }
+  },
+  {
+    "id": "85f3d2a3-a4dd-4f74-87d5-f04da85d8be3",
+    "source": "emojiapi",
+    "timestamp": "2026-06-06T14:25:30.427013476Z",
+    "data": {
+      "name": "octagonal sign ≊ stop sign",
+      "category": "travel and places",
+      "group": "travel and places",
+      "htmlCode": [
+        "\u0026#128721;"
+      ],
+      "unicode": [
+        "U+1F6D1"
+      ]
+    }
+  },
+  {
+    "id": "06b6323f-1a36-4afe-b242-e8d886208972",
+    "source": "randomuserapi",
+    "timestamp": "2026-06-06T14:25:30.847266479Z",
+    "data": {
+      "gender": "female",
+      "name": {
+        "title": "Ms",
+        "first": "Aurora",
+        "last": "Smith"
+      },
+      "location": {
+        "street": {
+          "number": 2976,
+          "name": "Broadway Avenue"
+        },
+        "city": "Lower Hutt"
+      },
+      "email": "aurora.smith@example.com",
+      "login": {
+        "uuid": "2ac8416d-8d14-4016-ac3e-632c792e4b84",
+        "username": "whitegorilla324",
+        "password": "casanova"
+      },
+      "registered": {
+        "date": "2017-12-07T00:52:39.339Z",
+        "age": 8
+      },
+      "phone": "(518)-375-3010",
+      "cell": "(013)-557-3798",
+      "id": {
+        "name": "",
+        "value": null
+      }
+    }
+  },
+  {
+    "id": "a471a002-5b49-4791-a704-a230e4f6b513",
+    "source": "emojiapi",
+    "timestamp": "2026-06-06T14:25:31.488643667Z",
+    "data": {
+      "name": "neutral face",
+      "category": "smileys and people",
+      "group": "face neutral",
+      "htmlCode": [
+        "\u0026#128528;"
+      ],
+      "unicode": [
+        "U+1F610"
+      ]
+    }
+  },
+  {
+    "id": "3c74da21-27cd-4204-8591-4c6266c01c5e",
+    "source": "randomuserapi",
+    "timestamp": "2026-06-06T14:25:31.977285118Z",
+    "data": {
+      "gender": "female",
+      "name": {
+        "title": "Miss",
+        "first": "Giovanna",
+        "last": "Rumpf"
+      },
+      "location": {
+        "street": {
+          "number": 7226,
+          "name": "Danziger Straße"
+        },
+        "city": "Miesbach"
+      },
+      "email": "giovanna.rumpf@example.com",
+      "login": {
+        "uuid": "5b1bb39b-9ddc-40a5-8403-e6f1c301ef07",
+        "username": "browntiger467",
+        "password": "121314"
+      },
+      "registered": {
+        "date": "2003-11-13T21:02:26.112Z",
+        "age": 22
+      },
+      "phone": "0100-9904427",
+      "cell": "0179-6577262",
+      "id": {
+        "name": "SVNR",
+        "value": "12 111197 R 951"
+      }
+    }
+  },
+  {
+    "id": "b6467d78-4d8e-4727-8244-9cadb070e1ac",
+    "source": "emojiapi",
+    "timestamp": "2026-06-06T14:25:32.59155511Z",
+    "data": {
+      "name": "white square button",
+      "category": "symbols",
+      "group": "symbols",
+      "htmlCode": [
+        "\u0026#128307;"
+      ],
+      "unicode": [
+        "U+1F533"
+      ]
+    }
+  },
+  {
+    "id": "0d9e9740-f9ff-47b3-a931-4b991c8bf2ed",
+    "source": "emojiapi",
+    "timestamp": "2026-06-06T14:25:33.664901481Z",
+    "data": {
+      "name": "pistol",
+      "category": "objects",
+      "group": "objects",
+      "htmlCode": [
+        "\u0026#128299;"
+      ],
+      "unicode": [
+        "U+1F52B"
+      ]
+    }
+  }
+]
