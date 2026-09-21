@@ -2,4 +2,4 @@ target/
 .vscode
 __pycache__
 mycsv.csv
-output.json
+output.json.env

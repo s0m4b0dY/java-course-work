@@ -30,4 +30,15 @@ class EnvFileTest {
   void missingValueReturnsEmptyString() {
     assertEquals("", EnvFile.get("VERY_MISSING_KEY_FOR_TESTS", tempDir));
   }
+
+  @Test
+  void nullOrBlankKeyReturnsEmptyString() {
+    assertEquals("", EnvFile.get(null, tempDir));
+    assertEquals("", EnvFile.get("   ", tempDir));
+  }
+
+  @Test
+  void nullKeyListReturnsEmptyString() {
+    assertEquals("", EnvFile.getFirst(tempDir, (String[]) null));
+  }
 }

@@ -1,15 +1,19 @@
 package com.voronina.course.emojisapi;
 
 import java.io.IOException;
-
 import com.voronina.course.ApiObject;
 import com.voronina.course.BaseApi;
+import com.voronina.course.HttpSender;
 
 public class EmojiApi extends BaseApi {
   private static final String API_URL = "https://emojihub.yurace.pro/api/random";
 
   public EmojiApi() {
     super("EmojiApi");
+  }
+
+  EmojiApi(HttpSender httpSender) {
+    super("EmojiApi", httpSender);
   }
 
   @Override

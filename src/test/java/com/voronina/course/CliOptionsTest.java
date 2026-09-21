@@ -42,4 +42,32 @@ class CliOptionsTest {
     assertEquals(2, options.maxConcurrentTasks);
     assertEquals(5, options.intervalSeconds);
   }
+
+  @Test
+  void nullArgsKeepDefaults() {
+    CliOptions options = CliOptions.parse(null);
+
+    assertFalse(options.runAuto);
+    assertEquals(OutputFileFormat.JSON, options.format);
+    assertEquals("output", options.outputName);
+    assertTrue(options.overwrite);
+    assertEquals(50, options.objectsCount);
+  }
+
+  @Test
+  void shortFlagsAndNoOverwriteAreSupported() {
+    CliOptions options = CliOptions.parse(new String[] {
+        "-a",
+        "--no-overwrite",
+        "-n=4",
+        "-t=3",
+        "--format=something-else"
+    });
+
+    assertTrue(options.runAuto);
+    assertFalse(options.overwrite);
+    assertEquals(4, options.maxConcurrentTasks);
+    assertEquals(3, options.intervalSeconds);
+    assertEquals(OutputFileFormat.JSON, options.format);
+  }
 }

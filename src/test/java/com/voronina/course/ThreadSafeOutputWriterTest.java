@@ -22,4 +22,18 @@ class ThreadSafeOutputWriterTest {
 
     assertTrue(Files.exists(tempDir.resolve("safe.csv")));
   }
+
+  @Test
+  void nullFormatFallsBackToJsonAndCloseIsSafe() {
+    Api api = new TestObjects.SimpleApi("DemoApi", new String[] { "a" });
+    ThreadSafeOutputWriter writer = new ThreadSafeOutputWriter(
+        List.of(api), null, tempDir.resolve("safe-json").toString(), true);
+
+    writer.writeBatch("demoapi", List.of(
+        new TestObjects.SimpleObject(new String[] { "a" }, new String[] { "hello" })));
+    writer.printOutput(null);
+    writer.close();
+
+    assertTrue(Files.exists(tempDir.resolve("safe-json.json")));
+  }
 }

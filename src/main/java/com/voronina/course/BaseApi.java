@@ -5,22 +5,20 @@ import com.google.gson.GsonBuilder;
 
 import java.io.IOException;
 import java.net.URI;
-import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
 
 public abstract class BaseApi implements Api {
   private final String apiName;
   protected final Gson gson;
-  protected final HttpClient client;
+  protected final HttpSender httpSender;
 
   protected BaseApi(String apiName) {
-    this(apiName, HttpClient.newHttpClient());
+    this(apiName, new RealHttpSender());
   }
 
-  protected BaseApi(String apiName, HttpClient client) {
+  protected BaseApi(String apiName, HttpSender httpSender) {
     this.apiName = apiName;
-    this.client = client;
+    this.httpSender = httpSender;
     this.gson = new GsonBuilder().serializeNulls().create();
   }
 
@@ -33,7 +31,7 @@ public abstract class BaseApi implements Api {
     HttpRequest.Builder builder = HttpRequest.newBuilder(URI.create(url)).GET();
     fillHeaders(builder);
 
-    HttpResponse<String> response = client.send(builder.build(), HttpResponse.BodyHandlers.ofString());
+    HttpResult response = httpSender.send(builder.build());
     if (response.statusCode() < 200 || response.statusCode() >= 300) {
       throw new IOException(apiName + " HTTP error: " + response.statusCode() + " — " + response.body());
     }

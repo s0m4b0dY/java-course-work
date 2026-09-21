@@ -1,15 +1,19 @@
 package com.voronina.course.randomuserapi;
 
 import java.io.IOException;
-
 import com.voronina.course.ApiObject;
 import com.voronina.course.BaseApi;
+import com.voronina.course.HttpSender;
 
 public class RandomUserApi extends BaseApi {
   private static final String API_URL = "https://randomuser.me/api/";
 
   public RandomUserApi() {
     super("RandomUserApi");
+  }
+
+  RandomUserApi(HttpSender httpSender) {
+    super("RandomUserApi", httpSender);
   }
 
   @Override

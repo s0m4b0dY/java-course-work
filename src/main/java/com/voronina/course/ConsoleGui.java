@@ -11,10 +11,8 @@ public class ConsoleGui {
 
             System.out.println("Interactive mode: configure data fetch and output");
 
-            // Choose APIs from registry
             Map<String, ApiRegistry.ApiEntry> registry = ApiRegistry.all();
             List<String> keys = new ArrayList<>(registry.keySet());
-
             System.out.println("Available APIs:");
             for (int i = 0; i < keys.size(); i++) {
                 ApiRegistry.ApiEntry e = registry.get(keys.get(i));
@@ -22,7 +20,6 @@ public class ConsoleGui {
             }
             System.out.print("Select APIs to run (comma-separated numbers or keys, or 'all') [all]: ");
             String apisLine = sc.nextLine().trim();
-
             List<String> selectedKeys = new ArrayList<>();
             if (apisLine.isEmpty() || "all".equalsIgnoreCase(apisLine)) {
                 selectedKeys.addAll(keys);
@@ -40,23 +37,16 @@ public class ConsoleGui {
                     }
                 }
             }
-
-            // Format
             System.out.print("Output format (json/csv) [json]: ");
             String fmt = sc.nextLine().trim();
             OutputFileFormat format = "csv".equalsIgnoreCase(fmt) ? OutputFileFormat.CSV : OutputFileFormat.JSON;
 
-            // Overwrite or append
             System.out.print("Write mode - create new or append? (new/append) [new]: ");
             boolean overwrite = !"append".equalsIgnoreCase(sc.nextLine().trim());
-
-            // Output file name
             System.out.print("Base output file name [output]: ");
             String outName = sc.nextLine().trim();
             if (outName.isEmpty())
                 outName = "output";
-
-            // Count
             System.out.print("Objects per API to fetch [50]: ");
             String cnt = sc.nextLine().trim();
             int objectsCount = 50;
@@ -67,8 +57,6 @@ public class ConsoleGui {
                     System.out.println("Invalid number, using 50");
                 }
             }
-
-            // Build Api list via registry
             List<Api> apis = new ArrayList<>();
             System.out.println("Creating API instances...");
             for (String k : selectedKeys) {
@@ -78,12 +66,10 @@ public class ConsoleGui {
                 else
                     System.out.println("Warning: unknown api '" + k + "' - skipped");
             }
-
             if (apis.isEmpty()) {
                 System.out.println("No APIs selected. Exiting.");
                 return;
             }
-
             System.out.print("Maximum simultaneously running tasks n [2]: ");
             String threadsStr = sc.nextLine().trim();
             int maxConcurrentTasks = 2;
@@ -94,7 +80,6 @@ public class ConsoleGui {
                     System.out.println("Invalid number, using 2");
                 }
             }
-
             System.out.print("Polling interval t in seconds [5]: ");
             String intervalStr = sc.nextLine().trim();
             long intervalSeconds = 5;
@@ -105,12 +90,10 @@ public class ConsoleGui {
                     System.out.println("Invalid number, using 5");
                 }
             }
-
             System.out.print("After run, print output to screen? (all/specific/none) [all]: ");
             String printOpt = sc.nextLine().trim();
 
             String apiToPrint;
-
             if ("none".equalsIgnoreCase(printOpt)) {
                 apiToPrint = null;
             } else if ("specific".equalsIgnoreCase(printOpt)) {
@@ -122,7 +105,6 @@ public class ConsoleGui {
 
             System.out.println("Type 'start' to begin polling:");
             String command = sc.nextLine().trim();
-
             if (!"start".equalsIgnoreCase(command)) {
                 System.out.println("Polling was not started.");
                 return;
@@ -138,7 +120,6 @@ public class ConsoleGui {
                     format,
                     outName,
                     overwrite);
-
             try (ApiPollingManager pollingManager = new ApiPollingManager(
                     apis,
                     config,
@@ -150,12 +131,10 @@ public class ConsoleGui {
 
                 System.out.println("Polling is running.");
                 System.out.println("Type 'stop' and press Enter to stop early.");
-
                 Thread stopThread = new Thread(() -> {
                     while (pollingManager.isRunning()) {
                         try {
                             String line = sc.nextLine().trim();
-
                             if ("stop".equalsIgnoreCase(line)) {
                                 System.out.println("Stop requested...");
                                 pollingManager.stop();
@@ -168,7 +147,6 @@ public class ConsoleGui {
                         }
                     }
                 });
-
                 stopThread.setDaemon(true);
                 stopThread.start();
 

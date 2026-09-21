@@ -21,4 +21,11 @@ class ApiRegistryTest {
     assertEquals(1, selected.size());
     assertEquals("EmojiApi", selected.get(0).name());
   }
+
+  @Test
+  void nullKeyReturnsNullAndRegistryCannotBeModified() {
+    assertNull(ApiRegistry.create(null));
+    assertThrows(UnsupportedOperationException.class,
+        () -> ApiRegistry.all().put("x", null));
+  }
 }

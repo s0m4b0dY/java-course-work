@@ -63,3 +63,7 @@ target/site/jacoco/index.html
 ```
 
 The Jacoco check is configured for at least 70% line coverage.
+
+### API unit tests
+
+The API tests use Mockito to replace the project-owned `HttpSender` interface, so `mvn test` does not send real requests to EmojiHub, RandomUser or Freepik. The real `fetchData()` methods still run, including JSON parsing, URL/header creation and validation. `RealHttpSender` is the small production adapter that uses Java `HttpClient`.

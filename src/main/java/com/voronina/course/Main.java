@@ -15,7 +15,6 @@ public class Main {
                 System.out.println("No APIs selected. Exiting.");
                 return;
             }
-
             PollingConfig config = new PollingConfig(
                     options.maxConcurrentTasks,
                     options.intervalSeconds,
@@ -26,7 +25,6 @@ public class Main {
                     options.format,
                     options.outputName,
                     options.overwrite);
-
             try (ApiPollingManager pollingManager = new ApiPollingManager(
                     apis,
                     config,
@@ -34,7 +32,6 @@ public class Main {
                 Runtime.getRuntime().addShutdownHook(new Thread(pollingManager::stop));
 
                 pollingManager.start();
-
                 if (options.objectsCount > 0) {
                     pollingManager.awaitCompletion();
                     pollingManager.stop();
@@ -45,7 +42,6 @@ public class Main {
                     pollingManager.awaitCompletion();
                 }
             }
-
             return;
         }
 
@@ -62,7 +58,6 @@ public class Main {
         } else {
             for (String key : apisArg.split(",")) {
                 Api api = ApiRegistry.create(key.trim());
-
                 if (api != null) {
                     apis.add(api);
                 } else {

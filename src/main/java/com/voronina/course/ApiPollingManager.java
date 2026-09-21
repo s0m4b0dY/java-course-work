@@ -1,11 +1,9 @@
 package com.voronina.course;
 
 import java.io.IOException;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
@@ -13,7 +11,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -24,7 +21,6 @@ public class ApiPollingManager implements AutoCloseable {
 
   private final ScheduledExecutorService scheduler;
   private final ExecutorService workers;
-
   private final AtomicBoolean running = new AtomicBoolean(false);
   private final Map<String, AtomicInteger> fetchedPerApi = new ConcurrentHashMap<>();
 
@@ -38,7 +34,6 @@ public class ApiPollingManager implements AutoCloseable {
     this.apis = new ArrayList<>(apis);
     this.config = config;
     this.outputWriter = outputWriter;
-
     this.scheduler = Executors.newScheduledThreadPool(Math.max(1, apis.size()));
     this.workers = Executors.newFixedThreadPool(config.getMaxConcurrentTasks());
 
@@ -57,7 +52,6 @@ public class ApiPollingManager implements AutoCloseable {
     if (!running.compareAndSet(false, true)) {
       return;
     }
-
     System.out.println("Polling started.");
     System.out.println("Max concurrent tasks: " + config.getMaxConcurrentTasks());
     System.out.println("Interval after each completed request: " + config.getIntervalSeconds() + " seconds");
@@ -76,7 +70,6 @@ public class ApiPollingManager implements AutoCloseable {
 
     scheduler.shutdownNow();
     workers.shutdown();
-
     try {
       if (!workers.awaitTermination(10, TimeUnit.SECONDS)) {
         workers.shutdownNow();
@@ -86,13 +79,12 @@ public class ApiPollingManager implements AutoCloseable {
       workers.shutdownNow();
     }
 
-    for (int i = 0; i < finishedLatch.getCount(); i++) {
+    while (finishedLatch.getCount() > 0) {
       finishedLatch.countDown();
     }
 
     System.out.println("Polling stopped.");
   }
-
   public void awaitCompletion() {
     try {
       finishedLatch.await();
@@ -117,7 +109,6 @@ public class ApiPollingManager implements AutoCloseable {
       }
 
       workers.submit(() -> pollOnce(api));
-
     }, delaySeconds, TimeUnit.SECONDS);
   }
 
@@ -137,7 +128,6 @@ public class ApiPollingManager implements AutoCloseable {
       System.out.println("Fetching from API: " + apiName);
 
       ApiObject[] result = api.fetchData();
-
       if (result == null || result.length == 0) {
         System.out.println("API returned no data: " + apiName);
       } else {
@@ -146,7 +136,6 @@ public class ApiPollingManager implements AutoCloseable {
         if (!objects.isEmpty()) {
           outputWriter.writeBatch(sanitizeName(apiName), objects);
           int total = fetchedPerApi.get(apiName).addAndGet(objects.size());
-
           System.out.println("Fetched " + objects.size() + " objects from " + apiName
               + ". Total: " + total);
         }
@@ -160,21 +149,12 @@ public class ApiPollingManager implements AutoCloseable {
       System.out.println("Unexpected error from " + apiName + ": " + e.getMessage());
     } finally {
       if (running.get() && !isApiFinished(api)) {
-        /*
-         * Important:
-         * The next request for the same API is scheduled only after this request
-         * has fully finished. This satisfies the requirement:
-         *
-         * "Повторный опрос одного и того же API должен происходить не чаще,
-         * чем через t секунд после завершения предыдущего запроса"
-         */
         scheduleNext(api, config.getIntervalSeconds());
       } else {
         finishedLatch.countDown();
       }
     }
   }
-
   private List<ApiObject> limitObjectsIfNeeded(String apiName, List<ApiObject> objects) {
     if (config.isInfinite()) {
       return objects;
@@ -193,7 +173,6 @@ public class ApiPollingManager implements AutoCloseable {
 
     return objects.subList(0, remaining);
   }
-
   private boolean isApiFinished(Api api) {
     if (config.isInfinite()) {
       return false;

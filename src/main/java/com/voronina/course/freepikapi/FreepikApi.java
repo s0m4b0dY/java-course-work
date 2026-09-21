@@ -7,6 +7,7 @@ import com.google.gson.annotations.SerializedName;
 import com.voronina.course.ApiObject;
 import com.voronina.course.BaseApi;
 import com.voronina.course.EnvFile;
+import com.voronina.course.HttpSender;
 
 public class FreepikApi extends BaseApi {
   private static final String BASE_URL = "https://api.freepik.com/v1/icons";
@@ -21,6 +22,11 @@ public class FreepikApi extends BaseApi {
 
   FreepikApi(String apiKey) {
     super("FreepikApi");
+    this.apiKey = apiKey == null ? "" : apiKey.trim();
+  }
+
+  FreepikApi(String apiKey, HttpSender httpSender) {
+    super("FreepikApi", httpSender);
     this.apiKey = apiKey == null ? "" : apiKey.trim();
   }
 

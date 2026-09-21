@@ -10,7 +10,6 @@ public class PollingConfig {
     this.intervalSeconds = Math.max(0, intervalSeconds);
     this.maxObjectsPerApi = maxObjectsPerApi;
   }
-
   public int getMaxConcurrentTasks() {
     return maxConcurrentTasks;
   }
