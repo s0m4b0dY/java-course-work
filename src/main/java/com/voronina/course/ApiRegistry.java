@@ -1,7 +1,7 @@
 package com.voronina.course;
 
 import com.voronina.course.emojisapi.EmojiApi;
-import com.voronina.course.freepikapi.FreepikApi;
+import com.voronina.course.agentnexusapi.AgentNexusApi;
 import com.voronina.course.randomuserapi.RandomUserApi;
 
 import java.util.LinkedHashMap;
@@ -19,7 +19,7 @@ public class ApiRegistry {
   static {
     register("randomuser", "RandomUserApi", RandomUserApi::new);
     register("emoji",      "EmojiApi",      EmojiApi::new);
-    register("freepik",    "FreepikApi",    FreepikApi::new);
+    register("agentnexus", "AgentNexusApi", AgentNexusApi::new);
   }
 
   // -------------------------------------------------------------------------

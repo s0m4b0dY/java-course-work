@@ -1,5 +1,6 @@
 package com.voronina.course;
 
+import com.voronina.course.agentnexusapi.AgentNexusApi;
 import com.voronina.course.emojisapi.EmojiApi;
 import org.junit.jupiter.api.Test;
 
@@ -11,6 +12,7 @@ class ApiRegistryTest {
   @Test
   void createsKnownApiIgnoringCase() {
     assertTrue(ApiRegistry.create("EMOJI") instanceof EmojiApi);
+    assertTrue(ApiRegistry.create("AGENTNEXUS") instanceof AgentNexusApi);
     assertNull(ApiRegistry.create("missing"));
   }
 

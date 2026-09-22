@@ -2,17 +2,16 @@
 
 Small Java/Maven app that polls several public APIs and writes the result to JSON or CSV.
 
-## Freepik key
+## APIs
 
-Freepik requires an API key. The app checks system environment first and then `.env` in the project folder.
+The project currently uses:
 
-Example `.env`:
+- RandomUser API
+- EmojiHub API
+- Agent Nexus public discovery API
 
-```env
-FREEPIK_API_KEY=your_key_here
-```
-
-Old name `API_KEY` is also checked as a fallback.
+Agent Nexus uses the public discovery endpoint and does not require an API key for basic anonymous usage.
+To make repeated polling return different kinds of data, `AgentNexusApi` cycles through several search needs such as email, payments, GitHub, PostgreSQL, video processing and monitoring.
 
 ## Run examples
 
@@ -22,8 +21,8 @@ mvn exec:java -Dexec.mainClass="com.voronina.course.Main" -Dexec.args="--auto --
 ```
 
 ```sh
-# Only Freepik + Emoji, JSON, 5 objects per API
-mvn exec:java -Dexec.mainClass="com.voronina.course.Main" -Dexec.args="--auto --apis=freepik,emoji --format=json --output=icons --count=5 --threads=2 --interval=1"
+# Only Agent Nexus + Emoji, JSON, 10 objects per API
+mvn exec:java -Dexec.mainClass="com.voronina.course.Main" -Dexec.args="--auto --apis=agentnexus,emoji --format=json --output=discovery --count=10 --threads=2 --interval=1"
 ```
 
 ```sh
@@ -38,7 +37,7 @@ mvn exec:java -Dexec.mainClass="com.voronina.course.Main" -Dexec.args="--auto --
 
 ```sh
 # Print only selected API results after saving
-mvn exec:java -Dexec.mainClass="com.voronina.course.Main" -Dexec.args="--auto --format=json --output=result --count=10 --threads=2 --interval=1 --print-apis=randomuser,emoji"
+mvn exec:java -Dexec.mainClass="com.voronina.course.Main" -Dexec.args="--auto --format=json --output=result --count=10 --threads=2 --interval=1 --print-apis=agentnexus,emoji"
 ```
 
 ```sh
@@ -66,4 +65,4 @@ The Jacoco check is configured for at least 70% line coverage.
 
 ### API unit tests
 
-The API tests use Mockito to replace the project-owned `HttpSender` interface, so `mvn test` does not send real requests to EmojiHub, RandomUser or Freepik. The real `fetchData()` methods still run, including JSON parsing, URL/header creation and validation. `RealHttpSender` is the small production adapter that uses Java `HttpClient`.
+The API tests use Mockito to replace the project-owned `HttpSender` interface, so `mvn test` does not send real requests to EmojiHub, RandomUser or Agent Nexus. The real `fetchData()` methods still run, including JSON parsing, URL creation and validation. `RealHttpSender` is the small production adapter that uses Java `HttpClient`.
